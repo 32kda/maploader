@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.imagery;
 
 
 
+import java.text.MessageFormat;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;

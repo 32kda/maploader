@@ -1,7 +1,6 @@
 // License: GPL. For details, see LICENSE file.
 package org.openstreetmap.josm.data.preferences;
 
-import org.openstreetmap.josm.io.OsmApi;
 import org.openstreetmap.josm.spi.preferences.Config;
 import org.openstreetmap.josm.spi.preferences.IUrls;
 
@@ -49,12 +48,7 @@ public final class JosmUrls implements IUrls {
 
     @Override
     public String getOSMWebsiteDependingOnSelectedApi() {
-        final String api = OsmApi.getOsmApi().getServerUrl();
-        if (DEFAULT_API_URL.equals(api)) {
-            return getOSMWebsite();
-        } else {
-            return api.replaceAll("/api$", "");
-        }
+        return getOSMWebsite();        
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;

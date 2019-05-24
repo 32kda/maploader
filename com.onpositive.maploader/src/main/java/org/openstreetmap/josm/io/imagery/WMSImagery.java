@@ -3,13 +3,13 @@ package org.openstreetmap.josm.io.imagery;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -317,9 +317,9 @@ public class WMSImagery {
             boolean transparent) {
 
         Utils.ensure(selectedStyles == null || selectedLayers.size() == selectedStyles.size(),
-                MessageFormat.format("Styles size {0} does not match layers size {1}"),
+                MessageFormat.format("Styles size {0} does not match layers size {1}",
                 selectedStyles == null ? 0 : selectedStyles.size(),
-                        selectedLayers.size());
+                        selectedLayers.size()));
 
         return buildRootUrl() + "FORMAT=" + format + ((imageFormatHasTransparency(format) && transparent) ? "&TRANSPARENT=TRUE" : "")
                 + "&VERSION=" + this.version + "&SERVICE=WMS&REQUEST=GetMap&LAYERS="

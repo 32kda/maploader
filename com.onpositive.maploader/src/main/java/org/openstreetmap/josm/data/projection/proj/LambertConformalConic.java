@@ -12,6 +12,8 @@ import static java.lang.Math.sqrt;
 
 import static org.openstreetmap.josm.tools.Utils.toRadians;
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.CustomProjection.Param;
 import org.openstreetmap.josm.data.projection.Ellipsoid;
@@ -188,7 +190,7 @@ public class LambertConformalConic extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Lambert Conformal Conic");
+        return "Lambert Conformal Conic";
     }
 
     @Override

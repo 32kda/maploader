@@ -13,6 +13,7 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.tan;
 
+import java.text.MessageFormat;
 
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.Ellipsoid;
@@ -40,7 +41,7 @@ public class DoubleStereographic extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Double Stereographic");
+        return "Double Stereographic";
     }
 
     @Override

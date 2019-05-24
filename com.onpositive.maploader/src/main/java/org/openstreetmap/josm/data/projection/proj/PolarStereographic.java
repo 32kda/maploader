@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.projection.proj;
 
 
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.ProjectionConfigurationException;
 import org.openstreetmap.josm.tools.Utils;
@@ -86,7 +88,7 @@ public class PolarStereographic extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Polar Stereographic");
+        return "Polar Stereographic";
     }
 
     @Override

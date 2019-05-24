@@ -4,6 +4,7 @@ package org.openstreetmap.josm.data.imagery;
 
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

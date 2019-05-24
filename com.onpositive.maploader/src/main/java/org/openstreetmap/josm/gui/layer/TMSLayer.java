@@ -1,12 +1,10 @@
 // License: GPL. For details, see LICENSE file.
 package org.openstreetmap.josm.gui.layer;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.commons.jcs.access.CacheAccess;
-import org.openstreetmap.gui.jmapviewer.OsmMercator;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
 import org.openstreetmap.gui.jmapviewer.tilesources.AbstractTMSTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.ScanexTileSource;
@@ -17,8 +15,6 @@ import org.openstreetmap.josm.data.imagery.CachedAttributionBingAerialTileSource
 import org.openstreetmap.josm.data.imagery.ImageryInfo;
 import org.openstreetmap.josm.data.imagery.ImageryInfo.ImageryType;
 import org.openstreetmap.josm.data.imagery.TMSCachedTileLoader;
-import org.openstreetmap.josm.data.preferences.BooleanProperty;
-import org.openstreetmap.josm.data.preferences.IntegerProperty;
 import org.openstreetmap.josm.tools.Logging;
 
 /**
@@ -34,17 +30,6 @@ public class TMSLayer extends AbstractCachedTileSourceLayer<TMSTileSource>  {
     private static final String CACHE_REGION_NAME = "TMS";
 
     private static final String PREFERENCE_PREFIX = "imagery.tms";
-
-    /** minimum zoom level for TMS layer */
-    public static final IntegerProperty PROP_MIN_ZOOM_LVL = new IntegerProperty(PREFERENCE_PREFIX + ".min_zoom_lvl",
-            AbstractTileSourceLayer.PROP_MIN_ZOOM_LVL.get());
-    /** maximum zoom level for TMS layer */
-    public static final IntegerProperty PROP_MAX_ZOOM_LVL = new IntegerProperty(PREFERENCE_PREFIX + ".max_zoom_lvl",
-            AbstractTileSourceLayer.PROP_MAX_ZOOM_LVL.get());
-    /** shall TMS layers be added to download dialog */
-    public static final BooleanProperty PROP_ADD_TO_SLIPPYMAP_CHOOSER = new BooleanProperty(PREFERENCE_PREFIX + ".add_to_slippymap_chooser",
-            true);
-
 
     /**
      * Create a layer based on ImageryInfo

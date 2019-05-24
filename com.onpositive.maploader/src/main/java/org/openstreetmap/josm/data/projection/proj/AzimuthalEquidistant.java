@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.projection.proj;
 
 
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.ProjectionConfigurationException;
 import org.openstreetmap.josm.tools.JosmRuntimeException;
@@ -102,7 +104,7 @@ public class AzimuthalEquidistant extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Azimuthal Equidistant");
+        return "Azimuthal Equidistant";
     }
 
     @Override

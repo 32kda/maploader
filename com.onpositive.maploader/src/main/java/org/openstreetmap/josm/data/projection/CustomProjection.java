@@ -3,6 +3,7 @@ package org.openstreetmap.josm.data.projection;
 
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -263,12 +264,12 @@ public class CustomProjection extends AbstractProjection {
                 Integer zone;
                 try {
                     zone = Integer.valueOf(Optional.ofNullable(parameters.get(Param.zone.key)).orElseThrow(
-                            () -> new ProjectionConfigurationException(MessageFormat.format("UTM projection (''+proj=utm'') requires ''+zone=...'' parameter."))));
+                            () -> new ProjectionConfigurationException("UTM projection (''+proj=utm'') requires ''+zone=...'' parameter.")));
                 } catch (NumberFormatException e) {
                     zone = null;
                 }
                 if (zone == null || zone < 1 || zone > 60)
-                    throw new ProjectionConfigurationException(MessageFormat.format("Expected integer value in range 1-60 for ''+zone=...'' parameter."));
+                    throw new ProjectionConfigurationException("Expected integer value in range 1-60 for ''+zone=...'' parameter.");
                 this.lon0 = 6d * zone - 183d;
                 this.k0 = 0.9996;
                 this.x0 = 500_000;
@@ -451,7 +452,7 @@ public class CustomProjection extends AbstractProjection {
                 parameters.containsKey(Param.rf.key) ||
                 parameters.containsKey(Param.f.key) ||
                 parameters.containsKey(Param.b.key))
-            throw new ProjectionConfigurationException(MessageFormat.format("Combination of ellipsoid parameters is not supported."));
+            throw new ProjectionConfigurationException("Combination of ellipsoid parameters is not supported.");
         return null;
     }
 
@@ -471,7 +472,7 @@ public class CustomProjection extends AbstractProjection {
         }
         if (ellps == null) {
             if (result == null && parameters.containsKey(Param.no_defs.key))
-                throw new ProjectionConfigurationException(MessageFormat.format("Ellipsoid required (+ellps=* or +a=*, +b=*)"));
+                throw new ProjectionConfigurationException("Ellipsoid required (+ellps=* or +a=*, +b=*)");
             // nothing specified, use WGS84 as default
             ellps = result != null ? result.getEllipsoid() : Ellipsoid.WGS84;
         }
@@ -511,7 +512,7 @@ public class CustomProjection extends AbstractProjection {
         String[] numStr = paramList.split(",");
 
         if (numStr.length != 3 && numStr.length != 7)
-            throw new ProjectionConfigurationException(MessageFormat.format("Unexpected number of arguments for parameter ''towgs84'' (must be 3 or 7)"));
+            throw new ProjectionConfigurationException("Unexpected number of arguments for parameter ''towgs84'' (must be 3 or 7)");
         List<Double> towgs84Param = new ArrayList<>();
         for (String str : numStr) {
             try {
@@ -561,7 +562,7 @@ public class CustomProjection extends AbstractProjection {
      */
     public Proj parseProjection(Map<String, String> parameters, Ellipsoid ellps) throws ProjectionConfigurationException {
         String id = parameters.get(Param.proj.key);
-        if (id == null) throw new ProjectionConfigurationException(MessageFormat.format("Projection required (+proj=*)"));
+        if (id == null) throw new ProjectionConfigurationException("Projection required (+proj=*)");
 
         // "utm" is not a real projection, but a shortcut for a set of parameters
         if ("utm".equals(id)) {
@@ -632,7 +633,7 @@ public class CustomProjection extends AbstractProjection {
     public static Bounds parseBounds(String boundsStr) throws ProjectionConfigurationException {
         String[] numStr = boundsStr.split(",");
         if (numStr.length != 4)
-            throw new ProjectionConfigurationException(MessageFormat.format("Unexpected number of arguments for parameter ''+bounds'' (must be 4)"));
+            throw new ProjectionConfigurationException("Unexpected number of arguments for parameter ''+bounds'' (must be 4)");
         return new Bounds(parseAngle(numStr[1], "minlat (+bounds)"),
                 parseAngle(numStr[0], "minlon (+bounds)"),
                 parseAngle(numStr[3], "maxlat (+bounds)"),
@@ -714,7 +715,7 @@ public class CustomProjection extends AbstractProjection {
 
     @Override
     public String toString() {
-        return name != null ? name : MessageFormat.format("Custom Projection");
+        return name != null ? name : "Custom Projection";
     }
 
     /**

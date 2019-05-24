@@ -14,6 +14,7 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.tan;
 
+import java.text.MessageFormat;
 
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.Ellipsoid;
@@ -68,7 +69,7 @@ public class SwissObliqueMercator extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Swiss Oblique Mercator");
+        return "Swiss Oblique Mercator";
     }
 
     @Override

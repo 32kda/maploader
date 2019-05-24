@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.projection.proj;
 
 
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.projection.ProjectionConfigurationException;
@@ -213,7 +215,7 @@ public class ObliqueMercator extends AbstractProj implements ICentralMeridianPro
 
     @Override
     public String getName() {
-        return MessageFormat.format("Oblique Mercator");
+        return "Oblique Mercator";
     }
 
     @Override
@@ -331,7 +333,7 @@ public class ObliqueMercator extends AbstractProj implements ICentralMeridianPro
             temp = 0.5 * (f - 1.0 / f) * Math.tan(gamma0);
             if (Math.abs(temp) > 1.0) {
                 if (Math.abs(Math.abs(temp) - 1.0) > EPSILON) {
-                    throw new ProjectionConfigurationException(MessageFormat.format("error in initialization"));
+                    throw new ProjectionConfigurationException("error in initialization");
                 }
                 temp = (temp > 0) ? 1.0 : -1.0;
             }

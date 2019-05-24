@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.projection.proj;
 
 
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.ProjectionConfigurationException;
 import org.openstreetmap.josm.tools.Utils;
@@ -73,7 +75,7 @@ public class AlbersEqualArea extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Albers Equal Area");
+        return "Albers Equal Area";
     }
 
     @Override
@@ -96,7 +98,7 @@ public class AlbersEqualArea extends AbstractProj {
 
         // Compute Constants
         if (Math.abs(phi1 + phi2) < EPSILON) {
-            throw new ProjectionConfigurationException(MessageFormat.format("standard parallels are opposite"));
+            throw new ProjectionConfigurationException("standard parallels are opposite");
         }
         double sinphi = Math.sin(phi1);
         double cosphi = Math.cos(phi1);

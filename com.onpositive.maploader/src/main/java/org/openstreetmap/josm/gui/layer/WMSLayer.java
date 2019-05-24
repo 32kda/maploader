@@ -3,24 +3,18 @@ package org.openstreetmap.josm.gui.layer;
 
 
 
-import java.awt.event.ActionEvent;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-
-import org.apache.commons.jcs.access.CacheAccess;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
-import org.openstreetmap.josm.data.cache.BufferedImageCacheEntry;
 import org.openstreetmap.josm.data.imagery.AbstractWMSTileSource;
 import org.openstreetmap.josm.data.imagery.ImageryInfo;
 import org.openstreetmap.josm.data.imagery.ImageryInfo.ImageryType;
-import org.openstreetmap.josm.data.imagery.ImageryLayerInfo;
 import org.openstreetmap.josm.data.imagery.TemplatedWMSTileSource;
 import org.openstreetmap.josm.data.imagery.WMSCachedTileLoader;
 import org.openstreetmap.josm.data.imagery.WMSEndpointTileSource;
-import org.openstreetmap.josm.data.preferences.BooleanProperty;
 import org.openstreetmap.josm.data.preferences.IntegerProperty;
 import org.openstreetmap.josm.data.projection.Projection;
 import org.openstreetmap.josm.data.projection.ProjectionRegistry;
@@ -41,9 +35,6 @@ public class WMSLayer extends AbstractCachedTileSourceLayer<AbstractWMSTileSourc
 
     /** default tile size for WMS Layer */
     public static final IntegerProperty PROP_IMAGE_SIZE = new IntegerProperty(PREFERENCE_PREFIX + ".imageSize", 512);
-
-    /** should WMS layer autozoom in default mode */
-    public static final BooleanProperty PROP_DEFAULT_AUTOZOOM = new BooleanProperty(PREFERENCE_PREFIX + ".default_autozoom", true);
 
     private static final String CACHE_REGION_NAME = "WMS";
 
@@ -87,25 +78,6 @@ public class WMSLayer extends AbstractCachedTileSourceLayer<AbstractWMSTileSourc
         }
         info.setAttribution(tileSource);
         return tileSource;
-    }
-
-    /**
-     * This action will add a WMS layer menu entry with the current WMS layer
-     * URL and name extended by the current resolution.
-     * When using the menu entry again, the WMS cache will be used properly.
-     */
-    public class BookmarkWmsAction extends AbstractAction {
-        /**
-         * Constructs a new {@code BookmarkWmsAction}.
-         */
-        public BookmarkWmsAction() {
-            super(MessageFormat.format("Set WMS Bookmark"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ev) {
-            ImageryLayerInfo.addLayer(new ImageryInfo(info));
-        }
     }
 
     @Override
@@ -153,10 +125,4 @@ public class WMSLayer extends AbstractCachedTileSourceLayer<AbstractWMSTileSourc
         return CACHE_REGION_NAME;
     }
 
-    /**
-     * @return cache region for WMS layer
-     */
-    public static CacheAccess<String, BufferedImageCacheEntry> getCache() {
-        return AbstractCachedTileSourceLayer.getCache(CACHE_REGION_NAME);
-    }
 }

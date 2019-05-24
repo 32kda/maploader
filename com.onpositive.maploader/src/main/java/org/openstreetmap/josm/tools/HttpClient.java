@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
+import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -30,16 +31,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-
 import org.openstreetmap.josm.data.Version;
-import org.openstreetmap.josm.data.validation.routines.DomainValidator;
 import org.openstreetmap.josm.gui.progress.ProgressMonitor;
 import org.openstreetmap.josm.io.Compression;
 import org.openstreetmap.josm.io.NetworkManager;
 import org.openstreetmap.josm.io.ProgressInputStream;
 import org.openstreetmap.josm.io.ProgressOutputStream;
 import org.openstreetmap.josm.io.UTFInputStreamReader;
-import org.openstreetmap.josm.io.auth.DefaultAuthenticator;
 
 /**
  * Provides a uniform access for a HTTP/HTTPS server. This class should be used in favour of {@link HttpURLConnection}.
@@ -57,7 +55,7 @@ public final class HttpClient {
     private int maxRedirects = 5;
     private boolean useCache;
     private String reasonForRequest;
-    private String outputMessage = MessageFormat.format("Uploading data ...");
+    private String outputMessage = "Uploading data ...";
     private HttpURLConnection connection; // to allow disconnecting before `response` is set
     private Response response;
     private boolean finishOnCloseOutput = true;
@@ -81,7 +79,7 @@ public final class HttpClient {
     private HttpClient(URL url, String requestMethod) {
         try {
             String host = url.getHost();
-            String asciiHost = DomainValidator.unicodeToASCII(host);
+            String asciiHost = unicodeToASCII(host);
             this.url = asciiHost.equals(host) ? url : new URL(url.getProtocol(), asciiHost, url.getPort(), url.getFile());
         } catch (MalformedURLException e) {
             throw new JosmRuntimeException(e);
@@ -166,9 +164,9 @@ public final class HttpClient {
                         Logging.warn(e);
                     }
                 }
-                if (DefaultAuthenticator.getInstance().isEnabled() && connection.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    DefaultAuthenticator.getInstance().addFailedCredentialHost(url.getHost());
-                }
+//                if (DefaultAuthenticator.getInstance().isEnabled() && connection.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+//                    DefaultAuthenticator.getInstance().addFailedCredentialHost(url.getHost());
+//                }
             } catch (IOException | IllegalArgumentException | NoSuchElementException e) {
                 Logging.info("{0} {1} -> !!!", requestMethod, url);
                 Logging.warn(e);
@@ -188,8 +186,7 @@ public final class HttpClient {
                     Logging.info(MessageFormat.format("Download redirected to ''{0}''", redirectLocation));
                     return connect();
                 } else if (maxRedirects == 0) {
-                    String msg = MessageFormat.format("Too many redirects to the download URL detected. Aborting.");
-                    throw new IOException(msg);
+                    throw new IOException("Too many redirects to the download URL detected. Aborting.");
                 }
             }
             response = new Response(connection, progressMonitor);
@@ -720,5 +717,72 @@ public final class HttpClient {
      */
     public static Matcher getTomcatErrorMatcher(String data) {
         return data != null ? TOMCAT_ERR_MESSAGE.matcher(data) : null;
+    }
+    
+    /**
+     * Converts potentially Unicode input to punycode.
+     * If conversion fails, returns the original input.
+     *
+     * @param input the string to convert, not null
+     * @return converted input, or original input if conversion fails
+     */
+    // Needed by UrlValidator
+    public static String unicodeToASCII(String input) {
+        if (isOnlyASCII(input)) { // skip possibly expensive processing
+            return input;
+        }
+        try {
+            final String ascii = IDN.toASCII(input);
+            if (IdnBugHolder.IDN_TOASCII_PRESERVES_TRAILING_DOTS) {
+                return ascii;
+            }
+            final int length = input.length();
+            if (length == 0) { // check there is a last character
+                return input;
+            }
+            // RFC3490 3.1. 1)
+            //            Whenever dots are used as label separators, the following
+            //            characters MUST be recognized as dots: U+002E (full stop), U+3002
+            //            (ideographic full stop), U+FF0E (fullwidth full stop), U+FF61
+            //            (halfwidth ideographic full stop).
+            char lastChar = input.charAt(length-1); // fetch original last char
+            switch(lastChar) {
+                case '\u002E': // "." full stop
+                case '\u3002': // ideographic full stop
+                case '\uFF0E': // fullwidth full stop
+                case '\uFF61': // halfwidth ideographic full stop
+                    return ascii + '.'; // restore the missing stop
+                default:
+                    return ascii;
+            }
+        } catch (IllegalArgumentException e) { // input is not valid
+            Logging.trace(e);
+            return input;
+        }
+    }
+    
+    /*
+     * Check if input contains only ASCII
+     * Treats null as all ASCII
+     */
+    private static boolean isOnlyASCII(String input) {
+        if (input == null) {
+            return true;
+        }
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) > 0x7F) { // CHECKSTYLE IGNORE MagicNumber
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private static class IdnBugHolder {
+        private static boolean keepsTrailingDot() {
+            final String input = "a."; // must be a valid name
+            return input.equals(IDN.toASCII(input));
+        }
+
+        private static final boolean IDN_TOASCII_PRESERVES_TRAILING_DOTS = keepsTrailingDot();
     }
 }

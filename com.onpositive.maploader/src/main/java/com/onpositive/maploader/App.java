@@ -43,6 +43,8 @@ import com.osm2xp.generation.paths.PathsService;
 public class App 
 {
 	
+	private static final int MAX_IMG_SIZE = 768;
+
 	private static final int MIN_BOUNDING_BOX_METERS = 200;
 	
 	private static ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setDaemon(true).build());
@@ -166,7 +168,7 @@ public class App
 	protected static void saveImgForWay(File outFile, AbstractTileSourceLayer<?> sourceLayer, int idx,
 			WayEntity wayEntity) {
 		synchronized (futureList) {
-			futureList.add(service.submit(new DownloadTask(outFile,sourceLayer,wayEntity,service)));
+			futureList.add(service.submit(new DownloadWithDownscaleTask(outFile,sourceLayer,wayEntity,service, MAX_IMG_SIZE)));
 		}
 	}
     

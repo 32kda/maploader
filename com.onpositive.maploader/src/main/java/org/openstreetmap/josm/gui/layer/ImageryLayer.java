@@ -6,6 +6,7 @@ package org.openstreetmap.josm.gui.layer;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImagingOpException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -3,6 +3,7 @@ package org.openstreetmap.josm.data.coor.conversion;
 
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

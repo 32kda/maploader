@@ -3,6 +3,7 @@ package org.openstreetmap.josm.io;
 
 
 
+import java.text.MessageFormat;
 import java.util.Optional;
 
 import javax.xml.stream.Location;

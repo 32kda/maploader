@@ -1,6 +1,8 @@
 // License: GPL. For details, see LICENSE file.
 package org.openstreetmap.josm.io;
 
+import java.text.MessageFormat;
+
 /**
  * Online resources directly used by JOSM.
  * This does not include websites where user can sometimes be redirected through its web browser,

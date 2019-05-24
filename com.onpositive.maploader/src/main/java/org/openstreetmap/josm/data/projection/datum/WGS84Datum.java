@@ -17,6 +17,6 @@ public final class WGS84Datum extends NullDatum {
     public static final WGS84Datum INSTANCE = new WGS84Datum();
 
     private WGS84Datum() {
-        super(MessageFormat.format("WGS84"), Ellipsoid.WGS84);
+        super("WGS84", Ellipsoid.WGS84);
     }
 }

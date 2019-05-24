@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -309,7 +310,7 @@ public class WMTSTileSource extends AbstractTMSTileSource implements TemplatedTi
         this.baseUrl = capabilities.getBaseUrl();
         this.transferMode = capabilities.getTransferMode();
         if (info.getDefaultLayers().isEmpty()) {
-            Logging.warn(MessageFormat.format("No default layer selected, choosing first layer."));
+            Logging.warn("No default layer selected, choosing first layer.");
             if (!layers.isEmpty()) {
                 Layer first = layers.iterator().next();
                 this.defaultLayer = new DefaultLayer(info.getImageryType(), first.identifier, first.style, first.tileMatrixSet.identifier);

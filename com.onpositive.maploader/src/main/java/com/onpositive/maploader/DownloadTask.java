@@ -2,6 +2,7 @@ package com.onpositive.maploader;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -35,8 +36,7 @@ public class DownloadTask implements Callable<Object> {
 		try {
 			BufferedImage img = sourceLayer.paintImageFor(wayEntity.getBoundingBox(), 16,true, 0.4);
 			if (img != null) {
-				long id = wayEntity.getId();
-				ImageIO.write(img,"png", outFile);
+				saveImage(img);
 				Logging.info("Saved " + outFile.getAbsolutePath());
 			} else {
 				Logging.error("Failed to load all tiles for way " + wayEntity.getId());
@@ -50,6 +50,10 @@ public class DownloadTask implements Callable<Object> {
 			Logging.error(e);
 		}
 		return null;
+	}
+
+	protected void saveImage(BufferedImage img) throws IOException {
+		ImageIO.write(img,"png", outFile);
 	}
 
 }

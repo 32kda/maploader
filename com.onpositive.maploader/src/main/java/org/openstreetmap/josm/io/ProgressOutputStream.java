@@ -30,7 +30,7 @@ public class ProgressOutputStream extends OutputStream {
      * @since 10302
      */
     public ProgressOutputStream(OutputStream out, long size, ProgressMonitor progressMonitor, boolean finishOnClose) {
-        this(out, size, progressMonitor, MessageFormat.format("Uploading data ..."), finishOnClose);
+        this(out, size, progressMonitor, "Uploading data ...", finishOnClose);
     }
 
     /**

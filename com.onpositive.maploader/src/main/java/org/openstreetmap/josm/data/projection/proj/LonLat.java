@@ -17,7 +17,7 @@ public class LonLat implements Proj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Lat/lon (Geodetic)");
+        return "Lat/lon (Geodetic)";
     }
 
     @Override

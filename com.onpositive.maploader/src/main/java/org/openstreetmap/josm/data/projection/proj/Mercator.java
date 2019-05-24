@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.projection.proj;
 
 
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.ProjectionConfigurationException;
 import org.openstreetmap.josm.tools.Utils;
@@ -52,7 +54,7 @@ public class Mercator extends AbstractProj implements IScaleFactorProvider {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Mercator");
+        return "Mercator";
     }
 
     @Override

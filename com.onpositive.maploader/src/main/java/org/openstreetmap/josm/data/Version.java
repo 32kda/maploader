@@ -4,6 +4,7 @@ package org.openstreetmap.josm.data;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;

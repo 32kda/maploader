@@ -4,6 +4,7 @@ package org.openstreetmap.josm.data.imagery;
 
 import java.awt.Image;
 import java.io.StringReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,8 +35,6 @@ import org.openstreetmap.gui.jmapviewer.tilesources.TileSourceInfo;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.StructUtils;
 import org.openstreetmap.josm.data.StructUtils.StructEntry;
-import org.openstreetmap.josm.io.Capabilities;
-import org.openstreetmap.josm.io.OsmApi;
 import org.openstreetmap.josm.spi.preferences.Config;
 import org.openstreetmap.josm.spi.preferences.IPreferences;
 import org.openstreetmap.josm.tools.CheckParameterUtil;
@@ -1310,16 +1309,6 @@ public class ImageryInfo extends TileSourceInfo implements Comparable<ImageryInf
      */
     public void setImageryCategoryOriginalString(String categoryOriginalString) {
         this.categoryOriginalString = categoryOriginalString;
-    }
-
-    /**
-     * Returns true if this layer's URL is matched by one of the regular
-     * expressions kept by the current OsmApi instance.
-     * @return {@code true} is this entry is blacklisted, {@code false} otherwise
-     */
-    public boolean isBlacklisted() {
-        Capabilities capabilities = OsmApi.getOsmApi().getCapabilities();
-        return capabilities != null && capabilities.isOnImageryBlacklist(this.url);
     }
 
     /**

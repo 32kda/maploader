@@ -3,6 +3,8 @@ package org.openstreetmap.josm.data.projection.proj;
 
 
 
+import java.text.MessageFormat;
+
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.projection.ProjectionConfigurationException;
 import org.openstreetmap.josm.tools.Utils;
@@ -63,7 +65,7 @@ public class LambertAzimuthalEqualArea extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Lambert Azimuthal Equal Area");
+        return "Lambert Azimuthal Equal Area";
     }
 
     @Override

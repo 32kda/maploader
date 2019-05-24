@@ -5,6 +5,7 @@ package org.openstreetmap.josm.data.imagery;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;

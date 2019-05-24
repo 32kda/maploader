@@ -18,6 +18,6 @@ public final class GRS80Datum extends NullDatum {
     public static final GRS80Datum INSTANCE = new GRS80Datum();
 
     private GRS80Datum() {
-        super(MessageFormat.format("GRS80"), Ellipsoid.GRS80);
+        super("GRS80", Ellipsoid.GRS80);
     }
 }

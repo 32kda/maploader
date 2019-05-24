@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
@@ -92,7 +93,7 @@ public abstract class CacheCustomContent<T extends Throwable> {
                     JOptionPane.showMessageDialog(
                             null,
                             MessageFormat.format("<html>Failed to create missing cache directory: {0}</html>", cacheDir.getAbsoluteFile()),
-                            MessageFormat.format("Error"),
+                            "Error",
                             JOptionPane.ERROR_MESSAGE
                     );
                 }

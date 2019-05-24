@@ -128,7 +128,7 @@ public class TransverseMercator extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Transverse Mercator");
+        return "Transverse Mercator";
     }
 
     @Override

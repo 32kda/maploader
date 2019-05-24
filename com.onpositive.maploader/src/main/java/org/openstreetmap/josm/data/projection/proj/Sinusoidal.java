@@ -19,7 +19,7 @@ public class Sinusoidal extends AbstractProj {
 
     @Override
     public String getName() {
-        return MessageFormat.format("Sinusoidal");
+        return "Sinusoidal";
     }
 
     @Override

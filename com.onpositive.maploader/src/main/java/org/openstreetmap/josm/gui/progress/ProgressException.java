@@ -1,6 +1,8 @@
 // License: GPL. For details, see LICENSE file.
 package org.openstreetmap.josm.gui.progress;
 
+import java.text.MessageFormat;
+
 /**
  * An exception that is thrown by the progress monitor if something went wrong
  */

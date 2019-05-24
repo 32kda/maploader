@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -234,7 +235,7 @@ public class TMSCachedTileLoaderJob extends JCSCachedTileLoaderJob<String, Buffe
             .filter(x -> x.isAssignableFrom(SocketTimeoutException.class))
             .ifPresent(x -> tile.setLoaded(false));
         } else {
-            tile.setError(MessageFormat.format("Problem loading tile"));
+            tile.setError("Problem loading tile");
             // treat unknown errors as permanent and do not try to load tile again
         }
     }
@@ -280,7 +281,7 @@ public class TMSCachedTileLoaderJob extends JCSCachedTileLoaderJob<String, Buffe
     private boolean handleNoTileAtZoom() {
         if (isNoTileAtZoom()) {
             Logging.debug("JCS TMS - Tile valid, but no file, as no tiles at this level {0}", tile);
-            tile.setError(MessageFormat.format("No tiles at this zoom level"));
+            tile.setError("No tiles at this zoom level");
             tile.putValue("tile-info", "no-tile");
             return true;
         }
@@ -309,7 +310,7 @@ public class TMSCachedTileLoaderJob extends JCSCachedTileLoaderJob<String, Buffe
                             Logging.error(message);
                             Logging.debug(s);
                         } else {
-                            tile.setError(MessageFormat.format("Could not load image from tile server"));
+                            tile.setError("Could not load image from tile server");
                         }
                         return false;
                     }

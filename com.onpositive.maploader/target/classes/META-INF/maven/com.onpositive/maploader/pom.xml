@@ -55,9 +55,9 @@
 			<version>27.0.1-jre</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.10</version>
+		  <groupId>org.apache.commons</groupId>
+		  <artifactId>commons-compress</artifactId>
+		  <version>[1.18,)</version>
 		</dependency>
 		<dependency>
 		    <groupId>javax.json</groupId>

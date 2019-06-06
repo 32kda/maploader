@@ -1,0 +1,167 @@
+package com.onpositive.maploader;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+
+import org.apache.commons.jcs.access.AbstractCacheAccess;
+import org.apache.commons.jcs.access.behavior.ICacheAccess;
+import org.apache.commons.jcs.engine.control.CompositeCache;
+import org.openstreetmap.gui.jmapviewer.interfaces.CachedTileLoader;
+import org.openstreetmap.josm.data.cache.BufferedImageCacheEntry;
+import org.openstreetmap.josm.data.imagery.ImageryLayerInfo;
+import org.openstreetmap.josm.data.preferences.JosmBaseDirectories;
+import org.openstreetmap.josm.data.preferences.JosmUrls;
+import org.openstreetmap.josm.data.preferences.Preferences;
+import org.openstreetmap.josm.gui.layer.AbstractTileSourceLayer;
+import org.openstreetmap.josm.gui.layer.ImageryLayer;
+import org.openstreetmap.josm.spi.preferences.Config;
+import org.openstreetmap.josm.tools.GeomUtils;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.osm2xp.classification.model.WayEntity;
+import com.osm2xp.classification.output.CSVWriter;
+import com.osm2xp.classification.parsing.LearningDataParser;
+import com.osm2xp.core.model.osm.Tag;
+import com.osm2xp.generation.paths.PathsService;
+
+public abstract class SamplesCollector<T extends IHasId> {
+	
+	private static final int MAX_IMG_SIZE = 768;
+
+	private static final int MIN_BOUNDING_BOX_METERS = 200;
+	
+	private ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setDaemon(true).build());
+	private List<ImageryLayer> layers;
+	private List<Future<?>> futureList = new ArrayList<Future<?>>();
+
+	private double growFactor = 0;
+
+	/**
+	 * Constructs new SamplesCollector
+	 * @param basicFolder Folder to store additional info (preferences, caches...) into
+	 * @param growFactor - grow factor, image bounds will be taken this percent larger, than original entity bounds. E.g. 0.4 means bounding box will grow 1.4 x
+	 */
+	
+	public SamplesCollector(File basicFolder, double growFactor) {
+		this.growFactor = growFactor;
+		PathsService.getPathsProvider().setBasicFolder(basicFolder);
+		Preferences prefs = Preferences.main();
+		Config.setPreferencesInstance(prefs);
+		Config.setBaseDirectoriesProvider(JosmBaseDirectories.getInstance());
+		Config.setUrlsProvider(JosmUrls.getInstance());
+		prefs.init(false);
+		ImageryLayerInfo.instance.load(false);
+		layers = ImageryLayerInfo.instance.getLayers().stream().map(info -> ImageryLayer.create(info)).collect(Collectors.toList());
+	}
+	
+	public void collectSamples(String datasetID, File inputFolder, File outFolder) {
+		File[] inputs = inputFolder.listFiles(file -> file.isFile() && (file.getName().endsWith(".pbf") || file.getName().endsWith(".osm")));
+    	
+    	List<T> data = new ArrayList<>();
+    	for (File input : inputs) {
+			data.addAll(collectData(input, outFolder));
+		}
+    	synchronized (futureList) {
+    		List<Future<?>> curList = futureList;
+    		while (!curList.isEmpty()) {
+    			try {
+					List<Future<?>> addedList = new ArrayList<Future<?>>();
+					for (Future<?> future : curList) {
+						Object result = future.get();
+						if (result instanceof Future<?>) {
+							addedList.add((Future<?>) result);
+						}
+					}
+					curList = addedList;
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+    		
+		}
+    	
+    	for (Iterator<T> iterator = data.iterator(); iterator.hasNext();) {
+			T airfieldSurface = iterator.next();
+			if (!new File(outFolder, airfieldSurface.getId()).exists()) {
+				iterator.remove();
+			}
+		}
+    	
+    	try (CSVWriter<T> csvWriter = new CSVWriter<T>(new File(outFolder, datasetID + ".csv"), datasetID)) {
+    		csvWriter.write(data);
+    	} catch (IOException e1) {
+    		// TODO Auto-generated catch block
+    		e1.printStackTrace();
+    	}
+    	for (ImageryLayer layer : layers) {
+			if (layer instanceof CachedTileLoader) {
+				ICacheAccess<String, BufferedImageCacheEntry> cache = ((CachedTileLoader) layer).getCacheAccess();
+				if (cache instanceof AbstractCacheAccess){
+					AbstractCacheAccess<?, ?> access = (AbstractCacheAccess<?, ?>) cache;
+					CompositeCache<?, ?> cacheControl = access.getCacheControl();
+					if (cacheControl != null) {
+						cacheControl.save();
+					}
+				}
+			}
+		}
+	}
+
+	protected List<T> collectData(File inputFile, File outFolder) {
+		System.out.println("Processing " + inputFile.getAbsolutePath());
+		LearningDataParser parser = new LearningDataParser(inputFile, list -> isGoodSample(list));
+		List<T> data = new ArrayList<>();    	
+    	
+    	List<WayEntity> runWays = parser.getCollectedWays(true);
+    	for (WayEntity wayEntity : runWays) {
+			wayEntity.setBoundingBox(GeomUtils.checkMinSizeAndGrow(wayEntity.getBoundingBox(), MIN_BOUNDING_BOX_METERS, growFactor));
+		}
+    	
+//    	File folder = new File(outFolder, getDirName(inputFile));
+    	File folder = new File(outFolder, "images");
+    	folder.mkdirs();
+    	int layerIdx = 0;
+    	for (ImageryLayer layer : layers) {
+			if (layer instanceof AbstractTileSourceLayer && !layer.getInfo().getName().startsWith("OpenStreetMap")) { //XXX ugly hack here to avoid downloading OSM map 
+				AbstractTileSourceLayer<?> sourceLayer = (AbstractTileSourceLayer<?>) layer;
+				int idx = 0;
+				for (WayEntity entity : runWays) {
+					long key = entity.getId() > 0 ? entity.getId() : idx;
+					String fileName = key + "_" + layerIdx + ".png";
+					File outFile = new File(outFolder, fileName );
+					saveImgForWay(outFile, sourceLayer, idx, entity);
+//					data.add(new AirfieldSurface(fileName, isHardSurface(TagUtil.getValue("surface", entity.getTags()))));
+					data.add(convert(fileName, entity));
+					idx++;
+				}
+				layerIdx++;
+			}
+			
+		}
+    	return data;
+	}
+	
+	protected abstract T convert(String fileName, WayEntity entity);
+	
+	protected abstract boolean isGoodSample(List<Tag> tags);
+
+	protected void saveImgForWay(File outFile, AbstractTileSourceLayer<?> sourceLayer, int idx,
+			WayEntity wayEntity) {
+		synchronized (futureList) {
+			futureList.add(service.submit(new DownloadWithDownscaleTask(outFile,sourceLayer,wayEntity,service, MAX_IMG_SIZE)));
+		}
+	}
+	
+}

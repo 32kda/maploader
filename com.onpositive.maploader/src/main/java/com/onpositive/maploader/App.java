@@ -55,102 +55,109 @@ public class App
     public static void main( String[] args )
     {
     	File folder = new File("f:/tmp/osm/");
-    	File[] inputs = folder.listFiles(file -> file.isFile() && (file.getName().endsWith(".pbf") || file.getName().endsWith(".osm")));
-    	Predicate<List<Tag>> predicate = getRunwayPredicate();
+//    	Predicate<List<Tag>> predicate = getRunwayPredicate();
     	File outFolder = new File("F:/tmp/imagery_airfield");
-    	PathsService.getPathsProvider().setBasicFolder(outFolder);
-    	Preferences prefs = Preferences.main();
-    	Config.setPreferencesInstance(prefs);
-    	Config.setBaseDirectoriesProvider(JosmBaseDirectories.getInstance());
-    	Config.setUrlsProvider(JosmUrls.getInstance());
-    	prefs.init(false);
-    	ImageryLayerInfo.instance.load(false);
-    	layers = ImageryLayerInfo.instance.getLayers().stream().map(info -> ImageryLayer.create(info)).collect(Collectors.toList());
-    	for (File input : inputs) {
-			collectData(input, predicate, outFolder);
-		}
-    	synchronized (futureList) {
-    		List<Future<?>> curList = futureList;
-    		while (!curList.isEmpty()) {
-    			try {
-					List<Future<?>> addedList = new ArrayList<Future<?>>();
-					for (Future<?> future : curList) {
-						Object result = future.get();
-						if (result instanceof Future<?>) {
-							addedList.add((Future<?>) result);
-						}
-					}
-					curList = addedList;
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-    		
-		}
-    	
-    	for (Iterator<AirfieldSurface> iterator = data.iterator(); iterator.hasNext();) {
-			AirfieldSurface airfieldSurface = iterator.next();
-			if (!new File(outFolder, airfieldSurface.id).exists()) {
-				iterator.remove();
-			}
-		}
-    	
-    	try (CSVWriter<AirfieldSurface> csvWriter = new CSVWriter<AirfieldSurface>(new File(outFolder, "runways.csv"), "runways")) {
-    		csvWriter.write(data);
-    	} catch (IOException e1) {
-    		// TODO Auto-generated catch block
-    		e1.printStackTrace();
-    	}
-    	for (ImageryLayer layer : layers) {
-			if (layer instanceof CachedTileLoader) {
-				ICacheAccess<String, BufferedImageCacheEntry> cache = ((CachedTileLoader) layer).getCacheAccess();
-				if (cache instanceof AbstractCacheAccess){
-					AbstractCacheAccess<?, ?> access = (AbstractCacheAccess<?, ?>) cache;
-					CompositeCache<?, ?> cacheControl = access.getCacheControl();
-					if (cacheControl != null) {
-						cacheControl.save();
-					}
-				}
-			}
-		}
+    	new AirfieldSamplesCollector(outFolder).collectSamples("runways", folder, outFolder);
+//    	collectSamples(folder, outFolder, predicate);
     	
     }
 
-	protected static void collectData(File inputFile, Predicate<List<Tag>> predicate, File outFolder) {
-		System.out.println("Processing " + inputFile.getAbsolutePath());
-		LearningDataParser parser = new LearningDataParser(inputFile, predicate);
-    	
-    	
-    	List<WayEntity> runWays = parser.getCollectedWays(true);
-    	for (WayEntity wayEntity : runWays) {
-			wayEntity.setBoundingBox(GeomUtils.checkMinSizeAndGrow(wayEntity.getBoundingBox(), MIN_BOUNDING_BOX_METERS, 0.4));
-		}
-    	
-//    	File folder = new File(outFolder, getDirName(inputFile));
-    	File folder = new File(outFolder, "images");
-    	folder.mkdirs();
-    	int layerIdx = 0;
-    	for (ImageryLayer layer : layers) {
-			if (layer instanceof AbstractTileSourceLayer && !layer.getInfo().getName().startsWith("OpenStreetMap")) { //XXX ugly hack here to avoid downloading OSM map 
-				AbstractTileSourceLayer<?> sourceLayer = (AbstractTileSourceLayer<?>) layer;
-				int idx = 0;
-				for (WayEntity entity : runWays) {
-					long key = entity.getId() > 0 ? entity.getId() : idx;
-					String fileName = key + "_" + layerIdx + ".png";
-					File outFile = new File(outFolder, fileName );
-					saveImgForWay(outFile, sourceLayer, idx, entity);
-					data.add(new AirfieldSurface(fileName, isHardSurface(TagUtil.getValue("surface", entity.getTags()))));
-					idx++;
-				}
-				layerIdx++;
-			}
-			
-		}
-	}
+//	protected static void collectSamples(File folder, File outFolder, Predicate<List<Tag>> predicate) {
+//		File[] inputs = folder.listFiles(file -> file.isFile() && (file.getName().endsWith(".pbf") || file.getName().endsWith(".osm")));
+//    	
+//    	PathsService.getPathsProvider().setBasicFolder(outFolder);
+//    	Preferences prefs = Preferences.main();
+//    	Config.setPreferencesInstance(prefs);
+//    	Config.setBaseDirectoriesProvider(JosmBaseDirectories.getInstance());
+//    	Config.setUrlsProvider(JosmUrls.getInstance());
+//    	prefs.init(false);
+//    	ImageryLayerInfo.instance.load(false);
+//    	layers = ImageryLayerInfo.instance.getLayers().stream().map(info -> ImageryLayer.create(info)).collect(Collectors.toList());
+//    	for (File input : inputs) {
+//			collectData(input, predicate, outFolder);
+//		}
+//    	synchronized (futureList) {
+//    		List<Future<?>> curList = futureList;
+//    		while (!curList.isEmpty()) {
+//    			try {
+//					List<Future<?>> addedList = new ArrayList<Future<?>>();
+//					for (Future<?> future : curList) {
+//						Object result = future.get();
+//						if (result instanceof Future<?>) {
+//							addedList.add((Future<?>) result);
+//						}
+//					}
+//					curList = addedList;
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (ExecutionException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//    		
+//		}
+//    	
+//    	for (Iterator<AirfieldSurface> iterator = data.iterator(); iterator.hasNext();) {
+//			AirfieldSurface airfieldSurface = iterator.next();
+//			if (!new File(outFolder, airfieldSurface.id).exists()) {
+//				iterator.remove();
+//			}
+//		}
+//    	
+//    	try (CSVWriter<AirfieldSurface> csvWriter = new CSVWriter<AirfieldSurface>(new File(outFolder, "runways.csv"), "runways")) {
+//    		csvWriter.write(data);
+//    	} catch (IOException e1) {
+//    		// TODO Auto-generated catch block
+//    		e1.printStackTrace();
+//    	}
+//    	for (ImageryLayer layer : layers) {
+//			if (layer instanceof CachedTileLoader) {
+//				ICacheAccess<String, BufferedImageCacheEntry> cache = ((CachedTileLoader) layer).getCacheAccess();
+//				if (cache instanceof AbstractCacheAccess){
+//					AbstractCacheAccess<?, ?> access = (AbstractCacheAccess<?, ?>) cache;
+//					CompositeCache<?, ?> cacheControl = access.getCacheControl();
+//					if (cacheControl != null) {
+//						cacheControl.save();
+//					}
+//				}
+//			}
+//		}
+//	}
+
+//	protected static void collectData(File inputFile, Predicate<List<Tag>> predicate, File outFolder, IWayToResultConverter converter) {
+//		System.out.println("Processing " + inputFile.getAbsolutePath());
+//		LearningDataParser parser = new LearningDataParser(inputFile, predicate);
+//    	
+//    	
+//    	List<WayEntity> runWays = parser.getCollectedWays(true);
+//    	for (WayEntity wayEntity : runWays) {
+//			wayEntity.setBoundingBox(GeomUtils.checkMinSizeAndGrow(wayEntity.getBoundingBox(), MIN_BOUNDING_BOX_METERS, 0.4));
+//		}
+//    	
+////    	File folder = new File(outFolder, getDirName(inputFile));
+//    	File folder = new File(outFolder, "images");
+//    	folder.mkdirs();
+//    	int layerIdx = 0;
+//    	for (ImageryLayer layer : layers) {
+//			if (layer instanceof AbstractTileSourceLayer && !layer.getInfo().getName().startsWith("OpenStreetMap")) { //XXX ugly hack here to avoid downloading OSM map 
+//				AbstractTileSourceLayer<?> sourceLayer = (AbstractTileSourceLayer<?>) layer;
+//				int idx = 0;
+//				for (WayEntity entity : runWays) {
+//					long key = entity.getId() > 0 ? entity.getId() : idx;
+//					String fileName = key + "_" + layerIdx + ".png";
+//					File outFile = new File(outFolder, fileName );
+//					saveImgForWay(outFile, sourceLayer, idx, entity);
+////					data.add(new AirfieldSurface(fileName, isHardSurface(TagUtil.getValue("surface", entity.getTags()))));
+//					data.add(converter.convert(fileName, entity));
+//					idx++;
+//				}
+//				layerIdx++;
+//			}
+//			
+//		}
+//	}
 	
 	
 	private static boolean isHardSurface(String osmSurfaceType) {

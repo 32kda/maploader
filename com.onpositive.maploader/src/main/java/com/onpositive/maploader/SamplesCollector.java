@@ -59,15 +59,25 @@ public abstract class SamplesCollector<T extends IHasId> {
 		Config.setUrlsProvider(JosmUrls.getInstance());
 		prefs.init(false);
 		ImageryLayerInfo.instance.load(false);
+		if (ImageryLayerInfo.instance.getLayers().size() == 0) {
+			ImageryLayerInfo.instance.loadDefaults(true,null,false);	
+		}
 		layers = ImageryLayerInfo.instance.getLayers().stream().map(info -> ImageryLayer.create(info)).collect(Collectors.toList());
 	}
 	
-	public void collectSamples(String datasetID, File inputFolder, File outFolder) {
-		File[] inputs = inputFolder.listFiles(file -> file.isFile() && (file.getName().endsWith(".pbf") || file.getName().endsWith(".osm")));
+	public void collectSamples(String datasetID, File input, File outFolder) {
+		File[] inputs;
+		if (input.isFile() && (input.getName().endsWith(".pbf") || input.getName().endsWith(".osm"))) {
+			inputs = new File[] {input};
+		} else if (input.isDirectory()) {			
+			inputs = input.listFiles(file -> file.isFile() && (file.getName().endsWith(".pbf") || file.getName().endsWith(".osm")));
+		} else {
+			throw new IllegalArgumentException("Input File object should be either .osm.pbf file or directory");
+		}
     	
     	List<T> data = new ArrayList<>();
-    	for (File input : inputs) {
-			data.addAll(collectData(input, outFolder));
+    	for (File curInput : inputs) {
+			data.addAll(collectData(curInput, outFolder));
 		}
     	synchronized (futureList) {
     		List<Future<?>> curList = futureList;
@@ -124,20 +134,19 @@ public abstract class SamplesCollector<T extends IHasId> {
 		LearningDataParser parser = new LearningDataParser(inputFile, list -> isGoodSample(list));
 		List<T> data = new ArrayList<>();    	
     	
-    	List<WayEntity> runWays = parser.getCollectedWays(true);
-    	for (WayEntity wayEntity : runWays) {
+    	List<WayEntity> ways = parser.getCollectedWays(true);
+    	for (WayEntity wayEntity : ways) {
 			wayEntity.setBoundingBox(GeomUtils.checkMinSizeAndGrow(wayEntity.getBoundingBox(), MIN_BOUNDING_BOX_METERS, growFactor));
 		}
     	
 //    	File folder = new File(outFolder, getDirName(inputFile));
-    	File folder = new File(outFolder, "images");
-    	folder.mkdirs();
+    	outFolder.mkdirs();
     	int layerIdx = 0;
     	for (ImageryLayer layer : layers) {
 			if (layer instanceof AbstractTileSourceLayer && !layer.getInfo().getName().startsWith("OpenStreetMap")) { //XXX ugly hack here to avoid downloading OSM map 
 				AbstractTileSourceLayer<?> sourceLayer = (AbstractTileSourceLayer<?>) layer;
 				int idx = 0;
-				for (WayEntity entity : runWays) {
+				for (WayEntity entity : ways) {
 					long key = entity.getId() > 0 ? entity.getId() : idx;
 					String fileName = key + "_" + layerIdx + ".png";
 					File outFile = new File(outFolder, fileName );

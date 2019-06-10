@@ -54,10 +54,12 @@ public class App
 	
     public static void main( String[] args )
     {
-    	File folder = new File("f:/tmp/osm/");
+    	File input = new File("f:/tmp/osm/crimean-fed-district-latest.osm.pbf");
 //    	Predicate<List<Tag>> predicate = getRunwayPredicate();
     	File outFolder = new File("F:/tmp/imagery_airfield");
-    	new AirfieldSamplesCollector(outFolder).collectSamples("runways", folder, outFolder);
+//    	new AirfieldSamplesCollector(outFolder).collectSamples("runways", folder, outFolder);
+    	File basicFolder = new File("F:/tmp/ds_collection");
+		new BuildingTypeSamplesCollector(basicFolder).collectSamples("buildings", input, new File(basicFolder, "building_types"));
 //    	collectSamples(folder, outFolder, predicate);
     	
     }

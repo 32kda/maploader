@@ -12,7 +12,7 @@ import com.osm2xp.core.model.osm.Tag;
 public class BuildingTypeSamplesCollector extends SamplesCollector<BuildingWithType> {
 
 	public BuildingTypeSamplesCollector(File basicFolder) {
-		super(basicFolder, 0.6);
+		super(basicFolder, 0.1);
 	}
 
 	@Override

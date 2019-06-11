@@ -10,9 +10,11 @@ import com.osm2xp.classification.model.WayEntity;
 import com.osm2xp.core.model.osm.Tag;
 
 public class AirfieldSamplesCollector extends SamplesCollector<AirfieldSurface> {
+	
+	private static final int MIN_BOUNDING_BOX_METERS = 200;
 
 	public AirfieldSamplesCollector(File basicFolder) {
-		super(basicFolder, 0.4);
+		super(basicFolder, 0.4, 16);
 	}
 
 	@Override
@@ -27,6 +29,11 @@ public class AirfieldSamplesCollector extends SamplesCollector<AirfieldSurface> 
 	
 	private static boolean isHardSurface(String osmSurfaceType) {
 		return ("asphalt".equals(osmSurfaceType) || "paved".equals(osmSurfaceType) || osmSurfaceType.startsWith("concrete") || "metal".equals(osmSurfaceType));
+	}
+
+	@Override
+	protected int getMinBoundingBoxMeters() {
+		return MIN_BOUNDING_BOX_METERS;
 	}
 
 }

@@ -16,8 +16,8 @@ public class DownloadWithDownscaleTask extends DownloadTask {
 	private int maxSize;
 
 	public DownloadWithDownscaleTask(File outFile, AbstractTileSourceLayer<?> sourceLayer, WayEntity wayEntity,
-			ExecutorService service, int maxSize) {
-		super(outFile, sourceLayer, wayEntity, service);
+			ExecutorService service, double growFactor, int scale, int maxSize) {
+		super(outFile, sourceLayer, wayEntity, service, growFactor, scale);
 		this.maxSize = maxSize;
 	}
 	

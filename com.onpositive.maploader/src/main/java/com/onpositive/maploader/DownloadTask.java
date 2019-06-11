@@ -22,19 +22,23 @@ public class DownloadTask implements Callable<Object> {
 	private volatile int retryCnt = 5;
 	private ExecutorService service;
 	private File outFile;
+	private double growFactor;
+	private int scale;
 
 	public DownloadTask(File outFile, AbstractTileSourceLayer<?> sourceLayer, 
-			WayEntity wayEntity, ExecutorService service) {
+			WayEntity wayEntity, ExecutorService service, double growFactor, int scale) {
 				this.outFile = outFile;
 				this.sourceLayer = sourceLayer;
 				this.wayEntity = wayEntity;
 				this.service = service;
+				this.growFactor = growFactor;
+				this.scale = scale;
 	}
 
 	@Override
 	public Object call() throws Exception {
 		try {
-			BufferedImage img = sourceLayer.paintImageFor(wayEntity.getBoundingBox(), 16,true, 0.4);
+			BufferedImage img = sourceLayer.paintImageFor(wayEntity.getBoundingBox(), scale ,true, growFactor);
 			if (img != null) {
 				saveImage(img);
 				Logging.info("Saved " + outFile.getAbsolutePath());

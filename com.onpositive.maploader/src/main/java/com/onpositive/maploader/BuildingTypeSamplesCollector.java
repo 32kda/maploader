@@ -12,7 +12,7 @@ import com.osm2xp.core.model.osm.Tag;
 public class BuildingTypeSamplesCollector extends SamplesCollector<BuildingWithType> {
 
 	public BuildingTypeSamplesCollector(File basicFolder) {
-		super(basicFolder, 0.1);
+		super(basicFolder, 0.4, 18);
 	}
 
 	@Override
@@ -27,6 +27,11 @@ public class BuildingTypeSamplesCollector extends SamplesCollector<BuildingWithT
 	@Override
 	protected boolean isGoodSample(List<Tag> tags) {
 		return TypeProvider.getBuildingType(tags) != null;
+	}
+
+	@Override
+	protected int getMinBoundingBoxMeters() {
+		return 20;
 	}
 
 

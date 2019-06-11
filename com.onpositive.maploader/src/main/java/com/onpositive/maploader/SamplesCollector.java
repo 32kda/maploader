@@ -36,13 +36,13 @@ public abstract class SamplesCollector<T extends IHasId> {
 	
 	private static final int MAX_IMG_SIZE = 768;
 
-	private static final int MIN_BOUNDING_BOX_METERS = 200;
-	
 	private ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setDaemon(true).build());
 	private List<ImageryLayer> layers;
 	private List<Future<?>> futureList = new ArrayList<Future<?>>();
 
 	private double growFactor = 0;
+
+	private int scale;
 
 	/**
 	 * Constructs new SamplesCollector
@@ -50,8 +50,9 @@ public abstract class SamplesCollector<T extends IHasId> {
 	 * @param growFactor - grow factor, image bounds will be taken this percent larger, than original entity bounds. E.g. 0.4 means bounding box will grow 1.4 x
 	 */
 	
-	public SamplesCollector(File basicFolder, double growFactor) {
+	public SamplesCollector(File basicFolder, double growFactor, int scale) {
 		this.growFactor = growFactor;
+		this.scale = scale;
 		PathsService.getPathsProvider().setBasicFolder(basicFolder);
 		Preferences prefs = Preferences.main();
 		Config.setPreferencesInstance(prefs);
@@ -136,7 +137,7 @@ public abstract class SamplesCollector<T extends IHasId> {
     	
     	List<WayEntity> ways = parser.getCollectedWays(true);
     	for (WayEntity wayEntity : ways) {
-			wayEntity.setBoundingBox(GeomUtils.checkMinSizeAndGrow(wayEntity.getBoundingBox(), MIN_BOUNDING_BOX_METERS, growFactor));
+			wayEntity.setBoundingBox(GeomUtils.checkMinSizeAndGrow(wayEntity.getBoundingBox(), getMinBoundingBoxMeters(), growFactor));
 		}
     	
 //    	File folder = new File(outFolder, getDirName(inputFile));
@@ -162,6 +163,8 @@ public abstract class SamplesCollector<T extends IHasId> {
     	return data;
 	}
 	
+	protected abstract int getMinBoundingBoxMeters();
+
 	protected abstract T convert(String fileName, WayEntity entity);
 	
 	protected abstract boolean isGoodSample(List<Tag> tags);
@@ -169,7 +172,7 @@ public abstract class SamplesCollector<T extends IHasId> {
 	protected void saveImgForWay(File outFile, AbstractTileSourceLayer<?> sourceLayer, int idx,
 			WayEntity wayEntity) {
 		synchronized (futureList) {
-			futureList.add(service.submit(new DownloadWithDownscaleTask(outFile,sourceLayer,wayEntity,service, MAX_IMG_SIZE)));
+			futureList.add(service.submit(new DownloadWithDownscaleTask(outFile,sourceLayer,wayEntity,service, growFactor, scale, MAX_IMG_SIZE)));
 		}
 	}
 	

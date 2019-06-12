@@ -1,9 +1,6 @@
 package com.onpositive.maploader;
 
 import java.io.File;
-import java.io.IOException;
-
-import com.bbn.openmap.util.FileUtils;
 
 /**
  * Import pics for buildings and other map features
@@ -21,13 +18,8 @@ public class App
 //    	new AirfieldSamplesCollector(outFolder).collectSamples("runways", folder, outFolder);
     	File basicFolder = new File("F:/tmp/ds_collection");
 		File outFolder = new File(basicFolder, "building_types");
-		try {
-			FileUtils.deleteFile(outFolder);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		new BuildingTypeSamplesCollector(basicFolder).collectSamples("buildings", input, outFolder);
+		
+		new BuildingTypeSamplesCollector(basicFolder).collectSamples("buildings", input, outFolder, false);
 //    	collectSamples(folder, outFolder, predicate);
     	
     }

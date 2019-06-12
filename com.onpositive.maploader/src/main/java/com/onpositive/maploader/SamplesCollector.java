@@ -25,6 +25,7 @@ import org.openstreetmap.josm.gui.layer.ImageryLayer;
 import org.openstreetmap.josm.spi.preferences.Config;
 import org.openstreetmap.josm.tools.GeomUtils;
 
+import com.bbn.openmap.util.FileUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.osm2xp.classification.model.WayEntity;
 import com.osm2xp.classification.output.CSVWriter;
@@ -65,8 +66,33 @@ public abstract class SamplesCollector<T extends IHasId> {
 		}
 		layers = ImageryLayerInfo.instance.getLayers().stream().map(info -> ImageryLayer.create(info)).collect(Collectors.toList());
 	}
-	
+
+	/**
+	 * Collect samples as image files and create .csv dataset file for them
+	 * @param datasetID ID to use for dataset
+	 * @param input input .osm/.pbf file or folder containing such files (all matching files from it will be used in such case)
+	 * @param outFolder Output folder
+	 */
 	public void collectSamples(String datasetID, File input, File outFolder) {
+		collectSamples(datasetID, input, outFolder, true);
+	}
+	
+	/**
+	 * Collect samples as image files and create .csv dataset file for them
+	 * @param datasetID ID to use for dataset
+	 * @param input input .osm/.pbf file or folder containing such files (all matching files from it will be used in such case)
+	 * @param outFolder Output folder
+	 * @param clearOutput Clear output folder prior to collection or not. If <code>false</code> - already existing images wouldn't be re-downloaded
+	 */
+	public void collectSamples(String datasetID, File input, File outFolder, boolean clearOutput) {
+		if (clearOutput) {
+			try {
+				FileUtils.deleteFile(outFolder);
+			} catch (IOException e) {
+				throw new RuntimeException("Unable to clear target folder", e);
+			}
+		}
+		
 		File[] inputs;
 		if (input.isFile() && (input.getName().endsWith(".pbf") || input.getName().endsWith(".osm"))) {
 			inputs = new File[] {input};
@@ -80,6 +106,7 @@ public abstract class SamplesCollector<T extends IHasId> {
     	for (File curInput : inputs) {
 			data.addAll(collectData(curInput, outFolder));
 		}
+
     	synchronized (futureList) {
     		List<Future<?>> curList = futureList;
     		while (!curList.isEmpty()) {
@@ -104,8 +131,8 @@ public abstract class SamplesCollector<T extends IHasId> {
 		}
     	
     	for (Iterator<T> iterator = data.iterator(); iterator.hasNext();) {
-			T airfieldSurface = iterator.next();
-			if (!new File(outFolder, airfieldSurface.getId()).exists()) {
+			T current = iterator.next();
+			if (!new File(outFolder, current.getId()).exists()) {
 				iterator.remove();
 			}
 		}
@@ -150,8 +177,10 @@ public abstract class SamplesCollector<T extends IHasId> {
 				for (WayEntity entity : ways) {
 					long key = entity.getId() > 0 ? entity.getId() : idx;
 					String fileName = key + "_" + layerIdx + ".png";
-					File outFile = new File(outFolder, fileName );
-					saveImgForWay(outFile, sourceLayer, idx, entity);
+					File outFile = new File(outFolder, fileName);
+					if (!outFile.exists()) {
+						saveImgForWay(outFile, sourceLayer, idx, entity);
+					}
 //					data.add(new AirfieldSurface(fileName, isHardSurface(TagUtil.getValue("surface", entity.getTags()))));
 					data.add(convert(fileName, entity));
 					idx++;

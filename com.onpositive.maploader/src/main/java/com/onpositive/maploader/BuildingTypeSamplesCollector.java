@@ -12,14 +12,14 @@ import com.osm2xp.core.model.osm.Tag;
 public class BuildingTypeSamplesCollector extends SamplesCollector<BuildingWithType> {
 
 	public BuildingTypeSamplesCollector(File basicFolder) {
-		super(basicFolder, 0.4, 18);
+		super(basicFolder, 0.6, 18);
 	}
 
 	@Override
 	protected BuildingWithType convert(String fileName, WayEntity entity) {
 		BuildingType buildingType = TypeProvider.getBuildingType(entity.getTags());
 		if (buildingType != null) {
-			return new BuildingWithType("" +entity.getId(), buildingType);
+			return new BuildingWithType(fileName, buildingType);
 		}
 		return null;
 	}
